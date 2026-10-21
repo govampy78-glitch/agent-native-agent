@@ -1000,6 +1000,11 @@ document.addEventListener('paste', e => { const f = [...(e.clipboardData?.files 
 // 저장
 const stem = () => (S.name || '원고').replace(/\.[^.]+$/, '');
 async function save(filename, data) {
+  if (!S.downloads && !window.claude) { // claude.ai 밖(일반 웹 호스팅)에서는 브라우저 다운로드로 저장
+    const url = URL.createObjectURL(data instanceof Blob ? data : new Blob([data], { type: 'application/json' }));
+    const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000); toast(`${filename}을 저장했어요`); return true;
+  }
   if (!S.downloads) { toast('이 화면에서는 파일 저장을 쓸 수 없어요. claude.ai에서 열어 주세요'); return false; }
   try { await S.downloads.save({ filename, data }); toast(`${filename} 저장을 요청했어요`); return true; }
   catch (e) { toast(e.code === 'declined' ? '저장을 취소했어요' : `저장하지 못했어요 (${e.code || e.message})`); return false; }
