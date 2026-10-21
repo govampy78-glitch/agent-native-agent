@@ -607,9 +607,8 @@ JSON 하나만 답하라:
 function ruleReview(it) {
   const c = it.checks, r = it.r || {};
   const conf = { high: 'pass', medium: 'info', low: 'warn' };
-  c.match.agent = it.source === 'claude' ? { level: conf[it.confidence] || 'info', note: `확신도 ${({ high: '높음', medium: '보통', low: '낮음' })[it.confidence] || '보통'} · ${it.reason || '근거 없음'}` }
-    : it.source === 'rule' ? { level: 'info', note: it.reason + '. 그림과 맞는지 확인하세요' }
-    : { level: 'pass', note: '직접 지정했어요' };
+  if (it.source === 'claude') { c.match.agent = null; c.match.claude = { level: conf[it.confidence] || 'info', note: `확신도 ${({ high: '높음', medium: '보통', low: '낮음' })[it.confidence] || '보통'} · ${it.reason || '근거 없음'}` }; }
+  else c.match.agent = it.source === 'rule' ? { level: 'info', note: it.reason + '. 그림과 맞는지 확인하세요' } : { level: 'pass', note: '직접 지정했어요' };
   const b = bubbleById(it.bubble), s = st(it.style), line = S.lines.find(l => l.n === it.line);
   if (it.style === 'narration' && b && b.shape !== 'rect') c.style.agent = { level: 'warn', note: '나레이션인데 둥근 말풍선이에요' };
   else if (it.style !== 'narration' && b && b.shape === 'rect' && it.style !== 'hand') c.style.agent = { level: 'warn', note: `사각 박스인데 ${s.label} 스타일이에요` };
